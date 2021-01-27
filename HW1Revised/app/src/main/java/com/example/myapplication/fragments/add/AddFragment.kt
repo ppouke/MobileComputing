@@ -12,8 +12,8 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.myapplication.R
-import com.example.myapplication.db.Reminder
-import com.example.myapplication.db.ReminderViewModel
+import com.example.myapplication.model.Reminder
+import com.example.myapplication.ViewModel.ReminderViewModel
 
 
 class addFragment : Fragment() {

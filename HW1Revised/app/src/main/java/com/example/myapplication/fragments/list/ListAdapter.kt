@@ -4,9 +4,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
-import com.example.myapplication.db.Reminder
+import com.example.myapplication.model.Reminder
+import kotlinx.android.synthetic.main.custom_row.view.*
 
 class ListAdapter :RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
 
@@ -29,6 +31,11 @@ class ListAdapter :RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
         val currentItem = reminderList[position]
         holder.itemView.findViewById<TextView>(R.id.id_txt).text = currentItem.id.toString()
         holder.itemView.findViewById<TextView>(R.id.reminder_txt).text = currentItem.reminder.toString()
+
+        holder.itemView.rowLayout.setOnClickListener {
+            val action = ListFragmentDirections.actionListFragmentToUpdateFragment(currentItem)
+            holder.itemView.findNavController().navigate(action)
+        }
 
     }
 
