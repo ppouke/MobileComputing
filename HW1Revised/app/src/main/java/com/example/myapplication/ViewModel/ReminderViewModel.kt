@@ -33,4 +33,19 @@ class ReminderViewModel(application: Application) : AndroidViewModel(application
             repository.updateReminder(reminder)
         }
     }
+
+    fun deleteReminder(reminder: Reminder)
+    {
+        viewModelScope.launch(Dispatchers.IO){
+            repository.deleteReminder(reminder)
+        }
+    }
+
+    fun deleteAllReminders()
+    {
+        viewModelScope.launch(Dispatchers.IO)
+        {
+            repository.deleteAllReminders()
+        }
+    }
 }

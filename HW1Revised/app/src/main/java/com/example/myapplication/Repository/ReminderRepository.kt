@@ -16,4 +16,14 @@ class ReminderRepository(private val reminderDAO: ReminderDAO) {
        reminderDAO.updateReminder(reminder)
     }
 
+    suspend fun deleteReminder(reminder: Reminder)
+    {
+        reminderDAO.deleteReminder(reminder)
+    }
+
+    suspend fun deleteAllReminders()
+    {
+        reminderDAO.deleteAllReminders()
+    }
+
 }
