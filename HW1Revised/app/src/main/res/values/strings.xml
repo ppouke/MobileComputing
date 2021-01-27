@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="RTitle">Reminders</string>
+    <string name="Logout">Logout</string>
+    <string name="AddREm"> Add Reminder</string>
+    <string name="SaveRem">Save Reminder</string>
+    <string name="ReminderText">Reminder</string>
+    <string name="SharedPreferences">com.example.myapplication.REMINDERS</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="reminder_text">Reminder Text</string>
+    <string name="_1">1</string>
+</resources>
