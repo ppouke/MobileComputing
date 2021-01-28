@@ -1,6 +1,8 @@
 package com.example.myapplication.fragments.list
 
 import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
@@ -10,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.myapplication.LoginActivity
 import com.example.myapplication.R
 import com.example.myapplication.ViewModel.ReminderViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -32,7 +35,7 @@ class ListFragment : Fragment() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        mReminderViewModel = ViewModelProvider(this).get(ReminderViewModel::class.java)
+        mReminderViewModel = ViewModelProvider( b this).get(ReminderViewModel::class.java)
         mReminderViewModel.readAllData.observe(viewLifecycleOwner, Observer { reminder ->
             adapter.setData(reminder)
         })
@@ -40,6 +43,18 @@ class ListFragment : Fragment() {
         val fab = view.findViewById<FloatingActionButton>(R.id.floatingActionButton)
         fab.setOnClickListener{
             findNavController().navigate(R.id.action_listFragment_to_addFragment)
+        }
+
+        val logoutFab = view.findViewById<FloatingActionButton>(R.id.LogoutButton)
+        logoutFab.setOnClickListener{
+            val prefs = activity?.getSharedPreferences(getString(R.string.SharedPreferences), Context.MODE_PRIVATE)
+            with(prefs?.edit()){
+                this?.putInt(getString(R.string.LoginStatus), 0)
+                this?.apply()
+            }
+
+            Toast.makeText(requireContext(),"Logged Out!",Toast.LENGTH_SHORT).show()
+            startActivity(Intent(activity, LoginActivity::class.java))
         }
 
         //Add Menu
