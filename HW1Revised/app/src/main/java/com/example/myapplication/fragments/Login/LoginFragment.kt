@@ -80,8 +80,10 @@ class LoginFragment : Fragment() {
         val prefs = activity?.getSharedPreferences(getString(R.string.SharedPreferences),Context.MODE_PRIVATE) ?: return false
 
         val foundPass = prefs.getString(userId, null)
+        prefs.edit().putString(getString(R.string.CurrentUser),userId).apply()
 
         return if(!(TextUtils.isEmpty(foundPass))){
+
             foundPass == password
         }else{
             Toast.makeText(requireContext(), "No such user in the database", Toast.LENGTH_LONG).show()

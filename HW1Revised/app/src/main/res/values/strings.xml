@@ -23,4 +23,5 @@
     <string name="password">Password</string>
     <string name="user">Username</string>
     <string name="LoginStatus">loginStatus</string>
+    <string name="CurrentUser">currentUser</string>
 </resources>

@@ -18,11 +18,10 @@ interface ReminderDAO {
 
 
     @Delete
-    fun deleteReminder(reminder: Reminder)
+    suspend fun deleteReminder(reminder: Reminder)
 
     @Query("DELETE FROM reminder_table ")
     suspend fun deleteAllReminders()
-
 
 
 }

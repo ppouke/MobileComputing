@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.LoginActivity
+import com.example.myapplication.ProfileActivity
 import com.example.myapplication.R
 import com.example.myapplication.ViewModel.ReminderViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -35,7 +36,7 @@ class ListFragment : Fragment() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        mReminderViewModel = ViewModelProvider( b this).get(ReminderViewModel::class.java)
+        mReminderViewModel = ViewModelProvider( this).get(ReminderViewModel::class.java)
         mReminderViewModel.readAllData.observe(viewLifecycleOwner, Observer { reminder ->
             adapter.setData(reminder)
         })
@@ -71,6 +72,9 @@ class ListFragment : Fragment() {
         if(item.itemId == R.id.menu_delete)
         {
             deleteAllUsers()
+        }
+        if(item.itemId == R.id.menu_profile){
+            startActivity(Intent(activity, ProfileActivity::class.java))
         }
         return super.onOptionsItemSelected(item)
     }
