@@ -4,19 +4,27 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.text.TextUtils
 import android.view.*
 import androidx.fragment.app.Fragment
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
+import com.example.myapplication.MainActivity
 import com.example.myapplication.R
 import com.example.myapplication.ViewModel.ReminderViewModel
 import com.example.myapplication.model.Reminder
@@ -27,6 +35,8 @@ import kotlinx.android.synthetic.main.fragment_update.view.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.util.*
+import java.util.jar.Manifest
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -39,6 +49,13 @@ class UpdateFragment : Fragment() {
 
     private var stringURI : String? = null
 
+
+
+
+    val recordAudioRequestCode = 100
+    val requestImageRequestCode = 111
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -47,6 +64,8 @@ class UpdateFragment : Fragment() {
         val view =  inflater.inflate(R.layout.fragment_update, container, false)
 
         mReminderViewModel = ViewModelProvider(this).get(ReminderViewModel::class.java)
+
+
 
 
         //set correct text and image
@@ -71,6 +90,25 @@ class UpdateFragment : Fragment() {
         ciButton.setOnClickListener {
             Glide.with(this).clear(view.imageUPreview)
             pickImage()
+        }
+
+
+        //initialize microphone
+
+        if(ActivityCompat.checkSelfPermission(view.context, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
+            checkMicPermission()
+        }
+        val speechRecognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+
+
+
+
+        view.micButton.setOnClickListener {
+            startActivityForResult(speechRecognizerIntent, recordAudioRequestCode)
+
+
         }
 
         //Add menu
@@ -149,22 +187,43 @@ class UpdateFragment : Fragment() {
     private fun pickImage(){
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         intent.type = "image/*"
-        startActivityForResult(intent, 111)
+        startActivityForResult(intent, requestImageRequestCode)
 
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK && requestCode == 111){
-            if (data != null){
-                val contentURI = data!!.data
-                stringURI = contentURI.toString()
-                imageUPreview.setImageURI(contentURI)
+        when(requestCode){
+            requestImageRequestCode -> {
+                if (resultCode == Activity.RESULT_OK && data != null){
+                    val contentURI = data!!.data
+                    stringURI = contentURI.toString()
+                    imageUPreview.setImageURI(contentURI)
 
+                }
             }
 
+            recordAudioRequestCode -> {
+                if(resultCode == Activity.RESULT_OK && data != null){
+                    val result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                    UpdateReminder_et.setText(result?.get(0))
+
+                }
+            }
+        }
+
+    }
+
+    private fun checkMicPermission(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.RECORD_AUDIO), recordAudioRequestCode)
         }
     }
+
+
+
+
+
 
 
 }
