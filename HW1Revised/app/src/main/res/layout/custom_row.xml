@@ -29,4 +29,14 @@
         app:layout_constraintStart_toEndOf="@+id/id_txt"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.492" />
+
+    <ImageView
+        android:id="@+id/listImage"
+        android:layout_width="110dp"
+        android:layout_height="88dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toEndOf="@+id/reminder_txt"
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/ic_baseline_image_24" />
 </androidx.constraintlayout.widget.ConstraintLayout>

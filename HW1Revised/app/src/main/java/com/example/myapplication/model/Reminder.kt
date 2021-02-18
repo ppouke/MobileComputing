@@ -10,7 +10,15 @@ import kotlinx.android.parcel.Parcelize
 data class Reminder(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
-    val reminder : String
+    val message : String,
+    val location_x : String,
+    val location_y : String,
+    val reminder_time : Float,
+    val creation_time : String,
+    val creator_id : String,
+    val reminder_seen : Boolean,
+    val URI : String
+
 ): Parcelable
 
 

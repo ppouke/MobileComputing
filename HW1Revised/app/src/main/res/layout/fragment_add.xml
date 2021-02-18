@@ -5,34 +5,63 @@
     android:id="@+id/frameLayout2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.add.addFragment"
-    android:padding="24dp">
+    android:focusable="true"
+    android:padding="24dp"
+    tools:context=".fragments.add.addFragment">
 
 
     <EditText
         android:id="@+id/addReminder_et"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="132dp"
-        android:ems="10"
-        android:hint="The reminder message"
-        android:inputType="textPersonName"
-        android:text="@string/ReminderText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="MissingConstraints" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="72dp"
+            android:ems="10"
+            android:hint="The reminder message"
+            android:inputType="textPersonName"
+            android:text="@string/ReminderText"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="MissingConstraints" />
 
     <Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:text="Add Reminder"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loadImage"
+        app:layout_constraintVertical_bias="0.747" />
+
+    <ImageView
+        android:id="@+id/imagePreview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:layout_marginTop="80dp"
+        android:contentDescription="TODO"
+        android:src="@drawable/ic_baseline_image_24"
+        android:maxHeight="200dp"
+        android:minHeight="200dp"
+        android:minWidth="200dp"
+        android:maxWidth="200dp"
+        android:scaleType= "fitCenter"
+        android:adjustViewBounds="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/addReminder_et"
+        app:layout_constraintBottom_toTopOf="@id/loadImage"/>
+
+    <Button
+        android:id="@+id/loadImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="Choose image"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imagePreview" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
