@@ -21,12 +21,14 @@ import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.room.Room
 import com.example.myapplication.R
 import com.example.myapplication.model.Reminder
 import com.example.myapplication.ViewModel.ReminderViewModel
 import com.example.myapplication.db.AppDatabase
 import com.example.myapplication.fragments.list.ListFragment
+import com.example.myapplication.fragments.update.UpdateFragmentArgs
 import kotlinx.android.synthetic.main.fragment_add.*
 import kotlinx.android.synthetic.main.fragment_add.view.*
 import kotlinx.android.synthetic.main.fragment_update.*
@@ -43,6 +45,8 @@ import kotlin.reflect.typeOf
 class addFragment : Fragment(), TimePickerDialog.OnTimeSetListener {
 
     private lateinit var mReminderViewModel : ReminderViewModel
+
+    private val args by navArgs<addFragmentArgs>()
 
     private var stringURI : String? = null
 
@@ -117,7 +121,7 @@ class addFragment : Fragment(), TimePickerDialog.OnTimeSetListener {
 
 
         if (inputCheck(reminderText)) {
-            val reminder = Reminder(0,reminderText, "locX", "locY", timeSet.timeInMillis, createTime.timeInMillis, "user", false, uri)
+            val reminder = Reminder(0,reminderText, args.latitudeSet, args.longitudeSet, timeSet.timeInMillis, createTime.timeInMillis, "user", false, uri)
             //add data to database
 
 

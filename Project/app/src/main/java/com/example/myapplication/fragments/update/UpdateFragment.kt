@@ -144,7 +144,7 @@ class UpdateFragment : Fragment(), TimePickerDialog.OnTimeSetListener {
         if(inputCheck((reminder)))
         {
             //Create Reminder Object
-            val updatedReminder = Reminder(args.currentReminder.id, reminder, "locX", "locY",
+            val updatedReminder = Reminder(args.currentReminder.id, reminder, 66F, 25F,
                     0L, timeSet.timeInMillis, curUser.toString(), false, uri)
             //Update Reminder Object
             mReminderViewModel.updateReminder(updatedReminder)

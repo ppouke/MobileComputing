@@ -11,8 +11,8 @@ data class Reminder(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
     val message : String,
-    val location_x : String,
-    val location_y : String,
+    val location_x : Float,
+    val location_y : Float,
     val reminder_time : Long,
     val creation_time : Long,
     val creator_id : String,

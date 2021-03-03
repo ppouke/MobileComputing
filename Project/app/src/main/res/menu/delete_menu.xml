@@ -2,10 +2,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+ <item android:id="@+id/menu_map"
+     android:title="Map"
+     android:icon="@drawable/ic_baseline_map_24"
+     android:iconTint="@android:color/white"
+     app:showAsAction="ifRoom"/>
 
- <item android:id="@+id/menu_refresh"
-     android:title="Profile"
-     android:icon="@drawable/ic_baseline_refresh_24"
+
+ <item android:id="@+id/menu_delete"
+     android:title="Delete all"
+     android:icon="@drawable/ic_baseline_delete_24"
      android:iconTint="@android:color/white"
      app:showAsAction="ifRoom"/>
 
@@ -15,11 +21,14 @@
      android:iconTint="@android:color/white"
      app:showAsAction="ifRoom"/>
 
- <item android:id="@+id/menu_delete"
-     android:title="Delete"
-     android:icon="@drawable/ic_baseline_delete_24"
+ <item android:id="@+id/menu_refresh"
+     android:title="Refresh list"
+     android:icon="@drawable/ic_baseline_refresh_24"
      android:iconTint="@android:color/white"
      app:showAsAction="ifRoom"/>
+
+
+
 
 
 

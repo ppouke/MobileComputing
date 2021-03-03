@@ -4,6 +4,8 @@ plugins {
     id 'kotlin-kapt'
     id "androidx.navigation.safeargs.kotlin"
     id 'kotlin-android-extensions'
+
+
 }
 
 android {
@@ -80,4 +82,10 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
 
     implementation "androidx.work:work-runtime-ktx:2.5.0"
+
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
+
+
+
+
 }

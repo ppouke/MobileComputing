@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_listFragment_to_updateFragment"
             app:destination="@id/updateFragment" />
+        <action
+            android:id="@+id/action_listFragment_to_selectLocFragment"
+            app:destination="@id/selectLocFragment" />
     </fragment>
     <fragment
         android:id="@+id/addFragment"
@@ -25,6 +28,17 @@
         <action
             android:id="@+id/action_addFragment_to_listFragment"
             app:destination="@id/listFragment" />
+        <action
+            android:id="@+id/action_addFragment_to_addLocationFragment"
+            app:destination="@id/addLocationFragment" />
+        <argument
+            android:name="latitudeSet"
+            app:argType="float"
+            android:defaultValue="65.08238F" />
+        <argument
+            android:name="longitudeSet"
+            app:argType="float"
+            android:defaultValue="25.44262F" />
     </fragment>
     <fragment
         android:id="@+id/updateFragment"
@@ -37,5 +51,23 @@
         <argument
             android:name="currentReminder"
             app:argType="com.example.myapplication.model.Reminder" />
+    </fragment>
+    <fragment
+        android:id="@+id/selectLocFragment"
+        android:name="com.example.myapplication.fragments.list.SelectLocFragment"
+        android:label="Select Location"
+        tools:layout="@layout/fragment_select_loc" >
+        <action
+            android:id="@+id/action_selectLocFragment_to_listFragment"
+            app:destination="@id/listFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addLocationFragment"
+        android:name="com.example.myapplication.fragments.add.AddLocationFragment"
+        android:label="fragment_add_location"
+        tools:layout="@layout/fragment_add_location" >
+        <action
+            android:id="@+id/action_addLocationFragment_to_addFragment"
+            app:destination="@id/addFragment" />
     </fragment>
 </navigation>

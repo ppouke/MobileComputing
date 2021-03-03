@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -12,7 +13,9 @@ import android.view.*
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.work.Data
 
@@ -31,15 +34,26 @@ import com.example.myapplication.ViewModel.ReminderViewModel
 import com.example.myapplication.WorkManagers.ReminderReceiver
 import com.example.myapplication.WorkManagers.ReminderWorker
 import com.example.myapplication.model.Reminder
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.*
 import java.util.concurrent.TimeUnit
+import java.util.jar.Manifest
 import kotlin.random.Random
 
 class ListFragment : Fragment() {
 
 
     private lateinit var mReminderViewModel: ReminderViewModel
+
+
+    private lateinit var map: GoogleMap
+    private val TAG = ListFragment::class.java.simpleName
+    private val REQUEST_LOCATION_PERMISSION = 1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -82,6 +96,7 @@ class ListFragment : Fragment() {
             startActivity(Intent(activity, LoginActivity::class.java))
         }
 
+
         //Add Menu
         setHasOptionsMenu(true)
 
@@ -102,6 +117,9 @@ class ListFragment : Fragment() {
         }
         if(item.itemId == R.id.menu_refresh){
             setRecyclerView(requireView(), requireView().findViewById<SwitchCompat>(R.id.showAll).isChecked)
+        }
+        if(item.itemId == R.id.menu_map){
+            findNavController().navigate(R.id.action_listFragment_to_selectLocFragment)
         }
         return super.onOptionsItemSelected(item)
     }
@@ -154,13 +172,6 @@ class ListFragment : Fragment() {
     }
 
 
-    fun refresh(){
-
-        val view = requireView()
-
-        setRecyclerView(view, view.findViewById<SwitchCompat>(R.id.showAll).isChecked)
-
-    }
 
 
     companion object{
