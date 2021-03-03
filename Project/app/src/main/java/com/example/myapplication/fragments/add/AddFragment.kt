@@ -1,43 +1,52 @@
 package com.example.myapplication.fragments.add
 
 import android.app.Activity
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.Image
+import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.speech.RecognizerIntent
 import android.text.TextUtils
+import android.text.format.DateFormat
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.Toast
+import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.room.Room
 import com.example.myapplication.R
 import com.example.myapplication.model.Reminder
 import com.example.myapplication.ViewModel.ReminderViewModel
+import com.example.myapplication.db.AppDatabase
+import com.example.myapplication.fragments.list.ListFragment
 import kotlinx.android.synthetic.main.fragment_add.*
 import kotlinx.android.synthetic.main.fragment_add.view.*
 import kotlinx.android.synthetic.main.fragment_update.*
 import kotlinx.android.synthetic.main.fragment_update.view.*
 import kotlinx.android.synthetic.main.fragment_update.view.micButton
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.*
 import kotlin.reflect.typeOf
 
 
-class addFragment : Fragment() {
+class addFragment : Fragment(), TimePickerDialog.OnTimeSetListener {
 
     private lateinit var mReminderViewModel : ReminderViewModel
 
-
     private var stringURI : String? = null
+
+    private var timeSet : Calendar = Calendar.getInstance()
 
     val requestImageRequestCode = 111
     val recordAudioRequestCode = 100
@@ -82,6 +91,12 @@ class addFragment : Fragment() {
         }
 
 
+        view.setTimer.setOnClickListener {
+            pickTime()
+        }
+
+
+
 
         return view
     }
@@ -98,17 +113,49 @@ class addFragment : Fragment() {
             uri = stringURI as String
         }
 
+        val createTime = Calendar.getInstance()
+
 
         if (inputCheck(reminderText)) {
-            val reminder = Reminder(0,reminderText, "locX", "locY", 0f, "Today", "user", false, uri)
+            val reminder = Reminder(0,reminderText, "locX", "locY", timeSet.timeInMillis, createTime.timeInMillis, "user", false, uri)
             //add data to database
+
+
             mReminderViewModel.addReminder(reminder)
-            Toast.makeText( requireContext(),"Added Reminder!", Toast.LENGTH_LONG).show()
+
+
+
+
+
+            GlobalScope.launch {
+
+                val db = Room.databaseBuilder(
+                        requireContext(),
+                        AppDatabase::class.java,
+                        "com.example.myapplication.database").build()
+                val uuid = db.reminderDao().addReminder(reminder).toInt()
+                db.close()
+
+                Log.d("FRAGID", "${uuid}")
+
+
+                if(timeSet.timeInMillis > createTime.timeInMillis && view.toggleNotification.isChecked)
+                {
+                    ListFragment.setReminder(requireContext(),uuid, timeSet.timeInMillis, reminderText)
+                }
+
+            }
+
+
+
+            Toast.makeText( requireContext(),"Added Reminder for ${timeSet.time}", Toast.LENGTH_LONG).show()
             //navigate back
             findNavController().navigate(R.id.action_addFragment_to_listFragment)
         }else{
             Toast.makeText(requireContext(),"Please fill all text fields.", Toast.LENGTH_LONG).show()
         }
+
+
 
     }
 
@@ -153,6 +200,34 @@ class addFragment : Fragment() {
             ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.RECORD_AUDIO), recordAudioRequestCode)
         }
     }
+
+    private fun pickTime(){
+
+        var c = Calendar.getInstance()
+        val hour = c.get(Calendar.HOUR_OF_DAY)
+        val minute = c.get(Calendar.MINUTE)
+
+        TimePickerDialog(requireActivity(), this, hour, minute, DateFormat.is24HourFormat(requireActivity())).show()
+
+    }
+
+    override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
+
+        var c = Calendar.getInstance()
+
+        c.set(
+                c.get(Calendar.YEAR),
+                c.get(Calendar.MONTH),
+                c.get(Calendar.DAY_OF_MONTH),
+                hourOfDay,
+                minute
+        )
+
+        setTimer.setText("Set To ${hourOfDay}:${minute}")
+        timeSet = c
+
+    }
+
 
 
 }

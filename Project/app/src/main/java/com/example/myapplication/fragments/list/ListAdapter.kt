@@ -18,6 +18,7 @@ import com.example.myapplication.fragments.add.addFragment
 import com.example.myapplication.model.Reminder
 import kotlinx.android.synthetic.main.custom_row.view.*
 import java.lang.Exception
+import java.util.*
 
 class ListAdapter :RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
 
@@ -38,8 +39,11 @@ class ListAdapter :RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val currentItem = reminderList[position]
+
+
+        holder.itemView.findViewById<TextView>(R.id.reminder_txt).text = currentItem.message
         holder.itemView.findViewById<TextView>(R.id.id_txt).text = currentItem.id.toString()
-        holder.itemView.findViewById<TextView>(R.id.reminder_txt).text = currentItem.message.toString()
+
 
 
 
@@ -73,4 +77,8 @@ class ListAdapter :RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
         notifyDataSetChanged()
 
     }
+
+
+
+
 }

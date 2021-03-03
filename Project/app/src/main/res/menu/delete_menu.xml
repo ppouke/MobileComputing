@@ -2,6 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
+ <item android:id="@+id/menu_refresh"
+     android:title="Profile"
+     android:icon="@drawable/ic_baseline_refresh_24"
+     android:iconTint="@android:color/white"
+     app:showAsAction="ifRoom"/>
+
  <item android:id="@+id/menu_profile"
      android:title="Profile"
      android:icon="@drawable/ic_baseline_portrait_24"

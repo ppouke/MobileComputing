@@ -7,6 +7,8 @@ class ReminderRepository(private val reminderDAO: ReminderDAO) {
 
     val readAllData: LiveData<List<Reminder>> = reminderDAO.readAllData()
 
+    val readLast : LiveData<Reminder> = reminderDAO.readLast()
+
     suspend fun addReminder(reminder: Reminder){
         reminderDAO.addReminder(reminder)
     }

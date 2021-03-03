@@ -8,13 +8,16 @@ import com.example.myapplication.model.Reminder
 interface ReminderDAO {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun addReminder(reminder: Reminder)
+    suspend fun addReminder(reminder: Reminder):Long
 
     @Update
     suspend fun updateReminder(reminder: Reminder)
 
     @Query("SELECT * FROM reminder_table ORDER BY id ASC")
     fun readAllData(): LiveData<List<Reminder>>
+
+    @Query("SELECT * FROM reminder_table ORDER BY id DESC LIMIT 1")
+    fun readLast(): LiveData<Reminder>
 
 
     @Delete

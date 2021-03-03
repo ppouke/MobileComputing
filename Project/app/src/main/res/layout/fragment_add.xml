@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/frameLayout2"
@@ -7,6 +8,12 @@
     android:layout_height="match_parent"
     android:focusable="true"
     android:padding="24dp"
+    tools:context=".fragments.add.addFragment">
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:focusable="true"
     tools:context=".fragments.add.addFragment">
 
 
@@ -24,23 +31,29 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="MissingConstraints" />
 
-    <Button
-        android:id="@+id/button"
+    <ImageView
+        android:id="@+id/micButtonAdd"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add Reminder"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="80dp"
+        android:layout_marginEnd="36dp"
+        android:backgroundTint="#F9F8FA"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="5dp"
+        android:src="@drawable/ic_baseline_mic_24"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/loadImage"
-        app:layout_constraintVertical_bias="0.747" />
+        app:layout_constraintStart_toEndOf="@+id/addReminder_et"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
 
     <ImageView
         android:id="@+id/imagePreview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="40dp"
         android:contentDescription="TODO"
         android:src="@drawable/ic_baseline_image_24"
         android:maxHeight="200dp"
@@ -58,25 +71,51 @@
         android:id="@+id/loadImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         android:text="Choose image"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imagePreview" />
 
-    <ImageView
-        android:id="@+id/micButtonAdd"
+
+
+    <TextView
+        android:id="@+id/setTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
-        android:layout_marginEnd="36dp"
-        android:backgroundTint="#F9F8FA"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="5dp"
-        android:src="@drawable/ic_baseline_mic_24"
+        android:layout_marginTop="28dp"
+        android:hint="Set Notification time"
+        android:textSize="25sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/addReminder_et"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loadImage" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/toggleNotification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Show Notification"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/setTimer" />
+
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Reminder"
+        android:layout_marginTop="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toggleNotification" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

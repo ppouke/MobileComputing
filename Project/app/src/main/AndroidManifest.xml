@@ -28,6 +28,7 @@
             </intent-filter>
         </activity>
 
+        <receiver android:name=".WorkManagers.ReminderReceiver"/>
 
     </application>
 

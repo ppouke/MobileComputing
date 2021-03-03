@@ -2,6 +2,7 @@ package com.example.myapplication.fragments.update
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,12 +13,10 @@ import android.provider.MediaStore
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.text.TextUtils
+import android.text.format.DateFormat
 import android.view.*
+import android.widget.*
 import androidx.fragment.app.Fragment
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -27,6 +26,7 @@ import com.bumptech.glide.Glide
 import com.example.myapplication.MainActivity
 import com.example.myapplication.R
 import com.example.myapplication.ViewModel.ReminderViewModel
+import com.example.myapplication.fragments.list.ListFragment
 import com.example.myapplication.model.Reminder
 import kotlinx.android.synthetic.main.custom_row.view.*
 import kotlinx.android.synthetic.main.fragment_add.*
@@ -41,7 +41,7 @@ import java.util.jar.Manifest
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 
-class UpdateFragment : Fragment() {
+class UpdateFragment : Fragment(), TimePickerDialog.OnTimeSetListener {
 
     private val args by navArgs<UpdateFragmentArgs>()
 
@@ -50,6 +50,7 @@ class UpdateFragment : Fragment() {
     private var stringURI : String? = null
 
 
+    var timeSet : Calendar = Calendar.getInstance()
 
 
     val recordAudioRequestCode = 100
@@ -70,6 +71,10 @@ class UpdateFragment : Fragment() {
 
         //set correct text and image
         view.findViewById<EditText>(R.id.UpdateReminder_et).setText(args.currentReminder.message)
+
+        timeSet.timeInMillis = args.currentReminder.reminder_time
+
+        view.findViewById<TextView>(R.id.setUTimer).setText("Set To ${timeSet.get(Calendar.HOUR_OF_DAY)}:${timeSet.get(Calendar.MINUTE)}")
 
         var URI = Uri.parse(args.currentReminder.URI)
 
@@ -124,8 +129,6 @@ class UpdateFragment : Fragment() {
 
         val current = LocalDateTime.now()
 
-        val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
-        val formatted = current.format(formatter)
 
         val prefs = activity?.getSharedPreferences(getString(R.string.SharedPreferences), Context.MODE_PRIVATE)?: return
 
@@ -141,11 +144,23 @@ class UpdateFragment : Fragment() {
         if(inputCheck((reminder)))
         {
             //Create Reminder Object
-            val updatedReminder = Reminder(args.currentReminder.id, reminder, "locX", "locY", 0f, formatted.toString(), curUser.toString(), false, uri)
+            val updatedReminder = Reminder(args.currentReminder.id, reminder, "locX", "locY",
+                    0L, timeSet.timeInMillis, curUser.toString(), false, uri)
             //Update Reminder Object
             mReminderViewModel.updateReminder(updatedReminder)
             Toast.makeText(requireContext(),"Updated Reminder!", Toast.LENGTH_SHORT).show()
             //Navigate back
+
+
+            if(view.toggleUNotification.isChecked){
+
+                ListFragment.setReminder(requireContext(), args.currentReminder.id, timeSet.timeInMillis,reminder)
+            }
+            else{
+                ListFragment.cancelReminder(requireContext(), args.currentReminder.id)
+            }
+
+
             findNavController().navigate(R.id.action_updateFragment_to_listFragment)
 
         }else{
@@ -175,12 +190,15 @@ class UpdateFragment : Fragment() {
         builder.setPositiveButton("Yes") { _, _ ->
             mReminderViewModel.deleteReminder(args.currentReminder)
             Toast.makeText(requireContext(), "Removed ${args.currentReminder.message}", Toast.LENGTH_SHORT).show()
+            ListFragment.cancelReminder(requireContext(), args.currentReminder.id)
             findNavController().navigate(R.id.action_updateFragment_to_listFragment)
         }
         builder.setNegativeButton("No"){ _, _ ->}
         builder.setTitle("Delete ${args.currentReminder.message}?")
         builder.setMessage("Are you sure you want to delete ${args.currentReminder.message}? ")
         builder.create().show()
+
+
     }
 
 
@@ -218,6 +236,33 @@ class UpdateFragment : Fragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.RECORD_AUDIO), recordAudioRequestCode)
         }
+    }
+
+    private fun pickTime(){
+
+        var c = Calendar.getInstance()
+        val hour = c.get(Calendar.HOUR_OF_DAY)
+        val minute = c.get(Calendar.MINUTE)
+
+        TimePickerDialog(requireActivity(), this, hour, minute, DateFormat.is24HourFormat(requireActivity())).show()
+
+    }
+
+    override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
+
+        var c = Calendar.getInstance()
+
+        c.set(
+            c.get(Calendar.YEAR),
+            c.get(Calendar.MONTH),
+            c.get(Calendar.DAY_OF_MONTH),
+            hourOfDay,
+            minute
+        )
+
+        setUTimer.setText("Set To ${hourOfDay}:${minute}")
+        timeSet = c
+
     }
 
 
