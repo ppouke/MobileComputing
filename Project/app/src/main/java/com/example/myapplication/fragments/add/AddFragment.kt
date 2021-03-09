@@ -1,11 +1,11 @@
 package com.example.myapplication.fragments.add
 
+import android.Manifest
 import android.app.Activity
 import android.app.TimePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.Image
-import android.os.AsyncTask
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
@@ -21,39 +21,57 @@ import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.room.Room
 import com.example.myapplication.R
 import com.example.myapplication.model.Reminder
 import com.example.myapplication.ViewModel.ReminderViewModel
 import com.example.myapplication.db.AppDatabase
 import com.example.myapplication.fragments.list.ListFragment
-import com.example.myapplication.fragments.update.UpdateFragmentArgs
+import com.google.android.gms.location.*
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.CircleOptions
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.fragment_add.*
 import kotlinx.android.synthetic.main.fragment_add.view.*
-import kotlinx.android.synthetic.main.fragment_update.*
-import kotlinx.android.synthetic.main.fragment_update.view.*
-import kotlinx.android.synthetic.main.fragment_update.view.micButton
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.util.*
-import kotlin.reflect.typeOf
 
 
-class addFragment : Fragment(), TimePickerDialog.OnTimeSetListener {
+const val GEOFENCE_RADIUS = 200
+const val GEOFENCE_ID = "REMINDER_GEOFENCE_ID"
+const val GEOFENCE_EXPIRATION = 10 * 24 * 60 * 60 * 1000 // 10 days
+const val GEOFENCE_DWELL_DELAY =  10 * 1000 // 10 secs // 2 minutes
+const val GEOFENCE_LOCATION_REQUEST_CODE = 12345
+const val CAMERA_ZOOM_LEVEL = 15f
+const val LOCATION_REQUEST_CODE = 123
+
+
+class addFragment : Fragment(), TimePickerDialog.OnTimeSetListener, OnMapReadyCallback {
 
     private lateinit var mReminderViewModel : ReminderViewModel
 
-    private val args by navArgs<addFragmentArgs>()
 
     private var stringURI : String? = null
 
     private var timeSet : Calendar = Calendar.getInstance()
 
+    private lateinit var mMap : GoogleMap
+
+    var latitude : Float = 66F
+    var longitude : Float = 25F
+
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var geofencingClient: GeofencingClient
+
+
     val requestImageRequestCode = 111
     val recordAudioRequestCode = 100
+    val recordLocationRequestCode = 122
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -101,6 +119,22 @@ class addFragment : Fragment(), TimePickerDialog.OnTimeSetListener {
 
 
 
+        //init map
+
+        if(ActivityCompat.checkSelfPermission(view.context, android.Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            checkMapPermission()
+        }
+        else{
+            Log.d("ADDFRAG", "GOT LOC PERMISSION")
+        }
+
+        val mapFragment = childFragmentManager.findFragmentById(R.id.selectMap) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
+        geofencingClient = LocationServices.getGeofencingClient(requireContext())
+
 
         return view
     }
@@ -117,19 +151,21 @@ class addFragment : Fragment(), TimePickerDialog.OnTimeSetListener {
             uri = stringURI as String
         }
 
+
+        //time now
         val createTime = Calendar.getInstance()
 
 
+        //map
+        val latLng = LatLng(latitude.toDouble(), longitude.toDouble())
+
         if (inputCheck(reminderText)) {
-            val reminder = Reminder(0,reminderText, args.latitudeSet, args.longitudeSet, timeSet.timeInMillis, createTime.timeInMillis, "user", false, uri)
+            val seen = !view.mapToggle.isChecked // map toggle is not checked -> show even if not in geofence
+            val reminder = Reminder(0,reminderText, latitude, longitude, timeSet.timeInMillis, createTime.timeInMillis, "user", seen, uri)
             //add data to database
 
 
             mReminderViewModel.addReminder(reminder)
-
-
-
-
 
             GlobalScope.launch {
 
@@ -139,13 +175,28 @@ class addFragment : Fragment(), TimePickerDialog.OnTimeSetListener {
                         "com.example.myapplication.database").build()
                 val uuid = db.reminderDao().addReminder(reminder).toInt()
                 db.close()
-
                 Log.d("FRAGID", "${uuid}")
 
 
-                if(timeSet.timeInMillis > createTime.timeInMillis && view.toggleNotification.isChecked)
+                // Make notification
+
+                if((timeSet.timeInMillis > createTime.timeInMillis && view.toggleTime.isChecked))
                 {
-                    ListFragment.setReminder(requireContext(),uuid, timeSet.timeInMillis, reminderText)
+                    if(view.mapToggle.isChecked)
+                    {
+
+                        ListFragment.setReminder(requireContext(),uuid, timeSet.timeInMillis, reminderText,latLng, true)
+                    }
+                    else{
+
+                        ListFragment.setReminder(requireContext(),uuid, timeSet.timeInMillis, reminderText,latLng, false)
+                    }
+
+                }
+
+                else if(view.mapToggle.isChecked){
+
+                    ListFragment.createGeoFence(latLng, geofencingClient, reminderText, requireContext(), uuid)
                 }
 
             }
@@ -200,9 +251,18 @@ class addFragment : Fragment(), TimePickerDialog.OnTimeSetListener {
 
 
     private fun checkMicPermission(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.RECORD_AUDIO), recordAudioRequestCode)
         }
+    }
+
+
+    private fun checkMapPermission() {
+        Log.d("ADDFRAG", "REQUESTING PERMISSION")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+           ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION), recordLocationRequestCode)
+        }
+
     }
 
     private fun pickTime(){
@@ -231,6 +291,93 @@ class addFragment : Fragment(), TimePickerDialog.OnTimeSetListener {
         timeSet = c
 
     }
+
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        mMap = googleMap
+
+        (childFragmentManager.findFragmentById(R.id.selectMap) as? CustomMapFragment)?.let {
+            it.listener = object : CustomMapFragment.OnTouchListener {
+                override fun onTouch() {
+
+                    val mScrollView = view!!.findViewById<ScrollView>(R.id.addScrollView)
+                    mScrollView.requestDisallowInterceptTouchEvent(true)
+                }
+            }
+        }
+
+
+
+
+
+
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+
+            return
+        }
+        fusedLocationProviderClient.lastLocation.addOnSuccessListener {
+            if(it != null){
+                with(mMap){
+                    val latLng = LatLng(it.latitude, it.longitude)
+                    moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, CAMERA_ZOOM_LEVEL))
+                    Log.d("LOCATION", "SET")
+
+                }
+            }
+            else{
+                with(mMap){
+                    moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(65.toDouble(), 25.toDouble()), CAMERA_ZOOM_LEVEL))
+                    Log.d("LOCATION", "DEF")
+                }
+            }
+        }
+
+
+        setMapLongClick(mMap)
+    }
+
+
+
+    fun setMapLongClick(map : GoogleMap){
+
+        map.setOnMapLongClickListener {
+            val snippet = String.format(
+                    Locale.getDefault(),
+                    "Lat: %1$.5f, Lng: %2$.5f",
+                    it.latitude,
+                    it.longitude)
+
+            map.clear()
+            map.addMarker(
+                    MarkerOptions()
+                            .position(it)
+                            .title("Set Location")
+                            .snippet(snippet)
+            ).showInfoWindow()
+            map.addCircle(
+                    CircleOptions()
+                            .center(it)
+                            .strokeColor(Color.argb(50, 70, 70, 70))
+                            .fillColor(Color.argb(70, 150, 150, 150))
+                            .radius(GEOFENCE_RADIUS.toDouble())
+            )
+
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(it, CAMERA_ZOOM_LEVEL))
+            latitude = it.latitude.toFloat()
+            longitude = it.longitude.toFloat()
+
+        }
+
+    }
+
+
 
 
 

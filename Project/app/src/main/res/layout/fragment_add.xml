@@ -3,7 +3,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/frameLayout2"
+    android:id="@+id/addScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="true"
@@ -14,7 +14,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:focusable="true"
-    tools:context=".fragments.add.addFragment">
+    tools:context=".fragments.add.addFragment"
+    android:id="@+id/frameLayout2">
 
 
     <EditText
@@ -92,16 +93,38 @@
         app:layout_constraintTop_toBottomOf="@+id/loadImage" />
 
     <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/toggleNotification"
+        android:id="@+id/toggleTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="Show Notification"
+        android:text="Set Time Constraint"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/setTimer" />
 
+
+    <fragment
+        android:id="@+id/selectMap"
+        android:name="com.example.myapplication.fragments.add.CustomMapFragment"
+        android:layout_width="fill_parent"
+        android:layout_height="300dp"
+        android:layout_marginTop="40dp"
+        app:flow_horizontalBias="0.5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toggleTime" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/mapToggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Set Location Constraint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/selectMap" />
 
     <Button
         android:id="@+id/button"
@@ -112,7 +135,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toggleNotification" />
+        app:layout_constraintTop_toBottomOf="@+id/mapToggle" />
 
 
 

@@ -28,17 +28,6 @@
         <action
             android:id="@+id/action_addFragment_to_listFragment"
             app:destination="@id/listFragment" />
-        <action
-            android:id="@+id/action_addFragment_to_addLocationFragment"
-            app:destination="@id/addLocationFragment" />
-        <argument
-            android:name="latitudeSet"
-            app:argType="float"
-            android:defaultValue="65.08238F" />
-        <argument
-            android:name="longitudeSet"
-            app:argType="float"
-            android:defaultValue="25.44262F" />
     </fragment>
     <fragment
         android:id="@+id/updateFragment"
@@ -60,14 +49,5 @@
         <action
             android:id="@+id/action_selectLocFragment_to_listFragment"
             app:destination="@id/listFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/addLocationFragment"
-        android:name="com.example.myapplication.fragments.add.AddLocationFragment"
-        android:label="fragment_add_location"
-        tools:layout="@layout/fragment_add_location" >
-        <action
-            android:id="@+id/action_addLocationFragment_to_addFragment"
-            app:destination="@id/addFragment" />
     </fragment>
 </navigation>

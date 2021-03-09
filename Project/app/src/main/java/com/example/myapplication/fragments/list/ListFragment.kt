@@ -1,16 +1,14 @@
 package com.example.myapplication.fragments.list
 
 import android.app.*
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.app.ActivityCompat
@@ -21,7 +19,7 @@ import androidx.work.Data
 
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,18 +29,23 @@ import com.example.myapplication.LoginActivity
 import com.example.myapplication.ProfileActivity
 import com.example.myapplication.R
 import com.example.myapplication.ViewModel.ReminderViewModel
+import com.example.myapplication.WorkManagers.GeofenceReceiver
 import com.example.myapplication.WorkManagers.ReminderReceiver
 import com.example.myapplication.WorkManagers.ReminderWorker
 import com.example.myapplication.model.Reminder
-import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofencingClient
+import com.google.android.gms.location.GeofencingRequest
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.maps.android.SphericalUtil
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
-import java.util.jar.Manifest
 import kotlin.random.Random
 
 class ListFragment : Fragment() {
@@ -117,6 +120,7 @@ class ListFragment : Fragment() {
         }
         if(item.itemId == R.id.menu_refresh){
             setRecyclerView(requireView(), requireView().findViewById<SwitchCompat>(R.id.showAll).isChecked)
+            updateMockLocation()
         }
         if(item.itemId == R.id.menu_map){
             findNavController().navigate(R.id.action_listFragment_to_selectLocFragment)
@@ -150,14 +154,26 @@ class ListFragment : Fragment() {
 
             val curTime = Calendar.getInstance().timeInMillis
 
+
+            val prefs = activity?.getSharedPreferences(getString(R.string.SharedPreferences), Context.MODE_PRIVATE)
+            val lat = prefs?.getFloat("Latitude", 65.08238F)!!.toDouble()
+            val long = prefs?.getFloat("Longitude", 25.44262F)!!.toDouble()
+            val curLoc = LatLng(lat, long)
+
             if(!showAll){
 
                 var shownReminders = mutableListOf<Reminder>()
                 for(r in reminder){
                     val setTime = r.reminder_time
 
+                    val remLoc = LatLng(r.location_x.toDouble(), r.location_y.toDouble())
+
                     if(setTime - curTime <= 0){
-                        shownReminders.add(r)
+
+                        if(checkIfInsideGeoFence(curLoc, remLoc) || r.reminder_seen){
+
+                            shownReminders.add(r)
+                        }
                     }
                 }
                 adapter.setData(shownReminders)
@@ -170,6 +186,80 @@ class ListFragment : Fragment() {
         })
 
     }
+
+    private fun checkIfInsideGeoFence(p0 : LatLng, p1 : LatLng) : Boolean{
+        val dist = SphericalUtil.computeDistanceBetween(p0,p1)
+        return dist <= 200
+    }
+
+
+    private fun updateMockLocation(){
+
+        GlobalScope.launch {
+
+            Log.d("LISTFRAG","UPDATING MOCK LOCATION 1")
+            val prefs = activity?.getSharedPreferences(getString(R.string.SharedPreferences), Context.MODE_PRIVATE)
+            val lat = prefs?.getFloat("Latitude", 65.08238F)!!.toDouble()
+            val long = prefs?.getFloat("Longitude", 25.44262F)!!.toDouble()
+
+            val location = Location("flp")
+            location.latitude = lat
+            location.longitude = long
+            location.time = System.currentTimeMillis()
+            location.accuracy = 3.0f
+            location.elapsedRealtimeNanos = System.nanoTime()
+
+
+            setMockLocation(location)
+
+            delay(5000)
+
+            Log.d("LISTFRAG","UPDATING MOCK LOCATION 2")
+
+            setMockLocation(location)
+
+            delay(5000)
+
+            Log.d("LISTFRAG","UPDATING MOCK LOCATION 3")
+
+            setMockLocation(location)
+
+
+        }
+    }
+
+
+    private fun setMockLocation(location : Location){
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(
+                            requireContext(), android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        requireActivity(),
+                        arrayOf(
+                                android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                        ),
+                        ListFragment.GEOFENCE_LOCATION_REQUEST_CODE
+                )
+            } else {
+
+                Log.d("MOCK", "MOCKSERVICE")
+                LocationServices.getFusedLocationProviderClient(requireContext()).setMockMode(true)
+                LocationServices.getFusedLocationProviderClient(requireContext()).setMockLocation(location)
+
+            }
+        } else {
+            Log.d("MOCK", "MOCKSERVICE")
+            LocationServices.getFusedLocationProviderClient(requireContext()).setMockMode(true)
+            LocationServices.getFusedLocationProviderClient(requireContext()).setMockLocation(location)
+
+
+        }
+
+    }
+
+
 
 
 
@@ -217,7 +307,7 @@ class ListFragment : Fragment() {
         }
 
 
-        fun setReminder(context: Context, uid : Int, timeInMillis: Long, message: String){
+        fun setReminder(context: Context, uid : Int, timeInMillis: Long, message: String, latLng: LatLng, geo : Boolean){
 
 
             Log.d("ReminderFRAG", "SetReminder for ${message}")
@@ -225,11 +315,70 @@ class ListFragment : Fragment() {
             val intent = Intent(context, ReminderReceiver::class.java)
             intent.putExtra("uid", uid)
             intent.putExtra("message", message)
+            intent.putExtra("geo", geo)
+            intent.putExtra("lat", latLng.latitude.toFloat())
+            intent.putExtra("long", latLng.longitude.toFloat())
+
 
             val pendingIntent = PendingIntent.getBroadcast(context, uid, intent, PendingIntent.FLAG_ONE_SHOT)
 
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             alarmManager.setExact(AlarmManager.RTC, timeInMillis, pendingIntent)
+
+        }
+
+        const val GEOFENCE_RADIUS = 200
+        const val GEOFENCE_ID = "REMINDER_GEOFENCE_ID"
+        const val GEOFENCE_EXPIRATION = 10 * 24 * 60 * 60 * 1000 // 10 days
+        const val GEOFENCE_DWELL_DELAY =  10 * 1000 // 10 secs // 2 minutes
+        const val GEOFENCE_LOCATION_REQUEST_CODE = 12345
+
+
+        fun createGeoFence(location : LatLng, geoFencingClient: GeofencingClient, message: String, context: Context, uid: Int){
+
+
+            val geofence = Geofence.Builder()
+                .setRequestId(GEOFENCE_ID)
+                .setCircularRegion(location.latitude, location.longitude, GEOFENCE_RADIUS.toFloat())
+                .setExpirationDuration(GEOFENCE_EXPIRATION.toLong())
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_DWELL)
+                .setLoiteringDelay(GEOFENCE_DWELL_DELAY)
+                .build()
+
+            val geofenceRequest = GeofencingRequest.Builder()
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                .addGeofence(geofence)
+                .build()
+
+            val intent = Intent(context, GeofenceReceiver::class.java)
+                .putExtra("message", message)
+
+            val pendingIntent = PendingIntent.getBroadcast(
+                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (ContextCompat.checkSelfPermission(
+                        context, android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED) {
+                    Log.d("GEOFENCING", "NO PERMISSION")
+                } else {
+                    geoFencingClient.addGeofences(geofenceRequest, pendingIntent).run {
+                        addOnFailureListener{
+                            Log.d("GEOFENCING","FAIL")
+
+                        }
+                        addOnSuccessListener {
+                            Log.d("SUCCESS",this.isComplete.toString())
+                        }
+                    }
+                    Log.d("GEOFENCING", "THROUGH")
+
+                }
+            } else { geoFencingClient.addGeofences(geofenceRequest, pendingIntent)
+
+            }
+
 
         }
 

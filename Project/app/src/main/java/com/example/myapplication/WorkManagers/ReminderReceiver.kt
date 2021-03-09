@@ -11,26 +11,38 @@ import com.example.myapplication.R
 import com.example.myapplication.fragments.list.ListAdapter
 import com.example.myapplication.fragments.list.ListFragment
 
+import com.google.android.gms.location.GeofencingClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
+
 class ReminderReceiver : BroadcastReceiver() {
     var fragment : Fragment? = null
+
+
+    private lateinit var geofencingClient: GeofencingClient
+
     override fun onReceive(context: Context?, intent: Intent?) {
         val uid = intent?.getIntExtra("uid", 0)
         val message = intent?.getStringExtra("message")
+        val geo = intent?.getBooleanExtra("geo", false)
+        val lat = intent?.getFloatExtra("lat", 66F)
+        val long = intent?.getFloatExtra("long", 22F)
 
-        Log.d("RECIEVER", "uid : ${uid}")
+
+        Log.d("REMREC", "RECIEVED")
 
         //Notify
-        ListFragment.showNotification(context!!, message!!)
 
+        if(geo!!){
 
-        //update when in listfragment
-
-        // Start intent
-//        Handler(Looper.getMainLooper()).post({
-//            val intent = Intent(applicationContext, ListFragment::class.java)
-//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//            applicationContext.startActivity(intent)
-//        })
+            Log.d("RECIEVER", "uid : ${uid}")
+            geofencingClient = LocationServices.getGeofencingClient(context!!)
+            val location = LatLng(lat!!.toDouble(), long!!.toDouble())
+            ListFragment.createGeoFence(location, geofencingClient, message!!, context!!, uid!!)
+        }
+        else{
+            ListFragment.showNotification(context!!, message!!)
+        }
 
 
     }

@@ -28,6 +28,7 @@ import com.example.myapplication.R
 import com.example.myapplication.ViewModel.ReminderViewModel
 import com.example.myapplication.fragments.list.ListFragment
 import com.example.myapplication.model.Reminder
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.synthetic.main.custom_row.view.*
 import kotlinx.android.synthetic.main.fragment_add.*
 import kotlinx.android.synthetic.main.fragment_update.*
@@ -154,7 +155,8 @@ class UpdateFragment : Fragment(), TimePickerDialog.OnTimeSetListener {
 
             if(view.toggleUNotification.isChecked){
 
-                ListFragment.setReminder(requireContext(), args.currentReminder.id, timeSet.timeInMillis,reminder)
+                val location = LatLng(args.currentReminder.location_x.toDouble(), args.currentReminder.location_y.toDouble())
+                ListFragment.setReminder(requireContext(), args.currentReminder.id, timeSet.timeInMillis,reminder,location, !args.currentReminder.reminder_seen )
             }
             else{
                 ListFragment.cancelReminder(requireContext(), args.currentReminder.id)
